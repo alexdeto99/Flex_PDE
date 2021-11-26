@@ -1,0 +1,118 @@
+
+TITLE 'Entrega_1__de_Tomas'     
+COORDINATES cartesian2  
+VARIABLES        { system variables }
+  vx
+  vy
+  p
+  psi
+  
+SELECT         { method controls }
+
+ DEFINITIONS    { parameter definitions }
+rho = 800 {kg/m3}
+mu = 0.1 {kg/m s}
+vmed = 0.008  {m/s}
+H = 1
+L=H
+A=0.4*H
+f = 100 {factor correccio}
+vort=(dx(vy)-dy(vx)) {definició matemàtica de vorticitat}
+!perfils de velocitat
+vmax=1.5*(vmed)
+v=vmax*(1-((y-h/2)/(h/2))^2)    
+vxmaxsalida = val(vx,5*h,h/2)
+!podem expressar els valor maxims de la velocitat a tot el sistema com:
+
+vxmax=GLOBALMAX(vx)
+vymax= GLOBALMAX(vy)
+vymin=GLOBALMIN(vy)
+difp = val(p,0,h/2)
+!per representar la velocitat
+
+vvec=vector(vx,vy)  {velocitat general}
+vvecx =vector(vx,0)
+vvecy=vector(vy,0)
+! INITIAL VALUES
+EQUATIONS        
+vx: rho*(vx*dx(vx)+vy*dy(vx))=-dx(p)+mu*div(grad(vx)) 
+vy: rho*(vx*dx(vy)+vy*dy(vy))=-dy(p)+mu*div(grad(vy))
+p: del2(p)+rho*(dx(vx*dx(vx)+vy*dy(vx))+dy(vx*dx(vy)+vy*dy(vy)))-f*(dx(vx)+dy(vy))=0
+psi: vx=dy(psi)
+
+
+BOUNDARIES       
+  REGION 1       
+  
+  
+    																						                   START(0,0)  
+                                                                                                               
+                                                                                                               
+    
+    natural(p)=0   natural(vx)=0 natural(vy)=0 value(vx)=0 value(vy)=0 value(psi)=0                                         LINE TO (5*H,0)   {durante esta linea se van a cumplir estas condiciones}
+    
+    
+    value(p)=0 natural(vx)=0 natural(psi)=0                                                                                                                           LINE TO (5*H,H) 
+    
+                                                                                        
+    natural(p)=0 natural(vy)=0 value(vx)=0 value(vy)=0                                                                                                   LINE TO (2*H+L,H) 
+    
+    natural(p)=0 natural(vx)=0 value(vx)=0 value(vy)=0                                                                                                  LINE TO (2*H+L,H-A) 
+    
+    
+    natural(p)=0   natural(vy)=0 value(vx)=0 value(vy)=0                                                                                                 LINE TO (2*H,H-A) 
+     
+    
+   
+   natural(p)=0 natural(vx)=0 value(vx)=0  value(vy)=0                                                                                                  LINE TO (2*H,H) 
+    
+   
+   natural(p)=0 natural(vy)=0 value(vx)=0 value(vy)=0       								                                                             LINE TO (0,H) 
+    
+    
+    natural(p)=0 value(vx)=v value(vy)=0 natural(psi)=0                                                                                              
+                                                                                           
+                                                                                           
+                                                                                           
+                                                                                           
+                                                                                        
+                                                                                                               LINE TO CLOSE
+
+
+
+! TIME 0 TO 1    { if time dependent }
+MONITORS         { show progress }
+
+
+PLOTS            { save result displays }
+
+!velocitat apartat a 
+ vector(vvec)norm
+contour(vvec)painted 
+elevation(vvec) from (0,h)to (0,0) 
+elevation(vvec)from(2*h,0.6*h) to (2*h,0)
+elevation(vvec)from(3*h,0.6*h) to (3*h,0)
+elevation(vvec)from(5*h,h) to (5*h,0)
+ELEVATION(VVEC)FROM(0,0.35*h) to (5*h,0.35*h)
+!components velocitat apartat b
+contour(vvecx)painted report vxmax
+contour(vvecy)painted report vymin
+vector(vvecx)norm 
+vector(vvecy)norm
+
+
+!pressio
+contour(p)painted
+elevation(p)from(0,0.3*h) to (5*h,0.3*h)
+REPORT val(p,0,h/2) as 'press'
+!funcio corrent
+contour(psi)
+
+
+!vorticitat
+contour(vort)painted
+contour(vort)
+
+
+
+END
